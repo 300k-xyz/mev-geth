@@ -2246,6 +2246,8 @@ func (s *BundleAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[st
 		jsonResult := map[string]interface{}{
 			"txHash":      txHash,
 			"gasUsed":     receipt.GasUsed,
+			"logs":        receipt.Logs,
+			"returnData":  result.ReturnData,
 			"fromAddress": from.String(),
 			"toAddress":   to,
 		}
