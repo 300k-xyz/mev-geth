@@ -998,3 +998,38 @@ func TestStateDBTransientStorage(t *testing.T) {
 		t.Fatalf("transient storage mismatch: have %x, want %x", got, value)
 	}
 }
+
+func TestStateDBDump(t *testing.T) {
+	addr := func(a string) common.Address {
+		return common.HexToAddress(a)
+	}
+	slot := func(a string) common.Hash {
+		return common.HexToHash(a)
+	}
+
+	memDb := rawdb.NewMemoryDatabase()
+	db := NewDatabase(memDb)
+	state, _ := New(common.Hash{}, db, nil)
+	state.accessList = newAccessList()
+
+	state.AddAddressToAccessList(addr("aa"))          // 1
+	state.AddSlotToAccessList(addr("bb"), slot("01")) // 2,3
+	state.AddSlotToAccessList(addr("bb"), slot("02")) // 4
+
+	// same again, should cause no journal entries
+	state.AddSlotToAccessList(addr("bb"), slot("01"))
+	state.AddSlotToAccessList(addr("bb"), slot("02"))
+	state.AddAddressToAccessList(addr("aa"))
+
+	// some new ones
+	state.AddSlotToAccessList(addr("bb"), slot("03")) // 5
+	state.AddSlotToAccessList(addr("aa"), slot("01")) // 6
+	state.AddSlotToAccessList(addr("cc"), slot("01")) // 7,8
+	state.AddAddressToAccessList(addr("cc"))
+
+	dump := state.AccessListDump()
+	for i := 0; i < len(dump); i++ {
+		fmt.Println("address: %s", dump[i].Address)
+		fmt.Println("StorageKeys: %s", dump[i].StorageKeys)
+	}
+}

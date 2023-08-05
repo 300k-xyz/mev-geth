@@ -2247,6 +2247,7 @@ func (s *BundleAPI) CallBundle(ctx context.Context, args CallBundleArgs) (map[st
 			"txHash":      txHash,
 			"gasUsed":     receipt.GasUsed,
 			"logs":        receipt.Logs,
+			"accessList":  state.AccessListDump(),
 			"returnData":  result.ReturnData,
 			"fromAddress": from.String(),
 			"toAddress":   to,

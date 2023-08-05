@@ -1148,6 +1148,38 @@ func (s *StateDB) AddSlotToAccessList(addr common.Address, slot common.Hash) {
 	}
 }
 
+type AccessListItem struct {
+	Address     string   `json:"Address" gencodec:"required"`
+	StorageKeys []string `json:"StorageKeys" gencodec:"required"`
+}
+
+// AddressInAccessList returns true if the given address is in the access list.
+func (s *StateDB) AccessListDump() []AccessListItem {
+	var ret []AccessListItem
+	var idx int
+	for address := range s.accessList.addresses {
+		idx = s.accessList.addresses[address]
+		if idx == -1 {
+			// address yes, but no slots
+			ret = append(ret, AccessListItem{
+				Address:     address.String(),
+				StorageKeys: []string{},
+			})
+		} else {
+			slotsMap := s.accessList.slots[idx]
+			var slotArr []string
+			for slotHash := range slotsMap {
+				slotArr = append(slotArr, slotHash.String())
+			}
+			ret = append(ret, AccessListItem{
+				Address:     address.String(),
+				StorageKeys: slotArr,
+			})
+		}
+	}
+	return ret
+}
+
 // AddressInAccessList returns true if the given address is in the access list.
 func (s *StateDB) AddressInAccessList(addr common.Address) bool {
 	return s.accessList.ContainsAddress(addr)
