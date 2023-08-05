@@ -19,6 +19,7 @@ package state
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math"
 	"math/big"
@@ -1028,8 +1029,33 @@ func TestStateDBDump(t *testing.T) {
 	state.AddAddressToAccessList(addr("cc"))
 
 	dump := state.AccessListDump()
-	for i := 0; i < len(dump); i++ {
-		fmt.Println("address: %s", dump[i].Address)
-		fmt.Println("StorageKeys: %s", dump[i].StorageKeys)
-	}
+
+	json, _ := json.MarshalIndent(dump, "", "    ")
+	fmt.Println("json", string(json))
+	// not sure how to compare results yet
+	// go test ./core/state -v -run TestStateDBDump
+	/*
+			[
+		    {
+		        "Address": "0x00000000000000000000000000000000000000cc",
+		        "StorageKeys": [
+		            "0x0000000000000000000000000000000000000000000000000000000000000001"
+		        ]
+		    },
+		    {
+		        "Address": "0x00000000000000000000000000000000000000AA",
+		        "StorageKeys": [
+		            "0x0000000000000000000000000000000000000000000000000000000000000001"
+		        ]
+		    },
+		    {
+		        "Address": "0x00000000000000000000000000000000000000bb",
+		        "StorageKeys": [
+		            "0x0000000000000000000000000000000000000000000000000000000000000001",
+		            "0x0000000000000000000000000000000000000000000000000000000000000002",
+		            "0x0000000000000000000000000000000000000000000000000000000000000003"
+		        ]
+		    }
+		]
+	*/
 }
