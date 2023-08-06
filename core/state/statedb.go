@@ -1149,8 +1149,8 @@ func (s *StateDB) AddSlotToAccessList(addr common.Address, slot common.Hash) {
 }
 
 type AccessListItem struct {
-	Address     string   `json:"Address" gencodec:"required"`
-	StorageKeys []string `json:"StorageKeys" gencodec:"required"`
+	Address     string   `json:"address" gencodec:"required"`
+	StorageKeys []string `json:"storageKeys" gencodec:"required"`
 }
 
 // AddressInAccessList returns true if the given address is in the access list.
