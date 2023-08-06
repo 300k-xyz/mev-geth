@@ -1028,6 +1028,8 @@ func TestStateDBDump(t *testing.T) {
 	state.AddSlotToAccessList(addr("cc"), slot("01")) // 7,8
 	state.AddAddressToAccessList(addr("cc"))
 
+	state.AddAddressToAccessList(addr("dd"))
+
 	dump := state.AccessListDump()
 
 	json, _ := json.MarshalIndent(dump, "", "    ")

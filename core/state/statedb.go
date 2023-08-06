@@ -1159,22 +1159,18 @@ func (s *StateDB) AccessListDump() []AccessListItem {
 	var idx int
 	for address := range s.accessList.addresses {
 		idx = s.accessList.addresses[address]
-		if idx == -1 {
-			// address yes, but no slots
-			ret = append(ret, AccessListItem{
-				Address:     address.String(),
-				StorageKeys: []string{},
-			})
-		} else {
+		if idx != -1 {
 			slotsMap := s.accessList.slots[idx]
 			var slotArr []string
 			for slotHash := range slotsMap {
 				slotArr = append(slotArr, slotHash.String())
 			}
-			ret = append(ret, AccessListItem{
-				Address:     address.String(),
-				StorageKeys: slotArr,
-			})
+			if len(slotArr) > 0 {
+				ret = append(ret, AccessListItem{
+					Address:     address.String(),
+					StorageKeys: slotArr,
+				})
+			}
 		}
 	}
 	return ret
