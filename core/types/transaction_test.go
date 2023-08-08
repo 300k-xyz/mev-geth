@@ -257,7 +257,6 @@ func TestRecipientNormal(t *testing.T) {
 	if addr != from {
 		t.Fatal("derived address doesn't match")
 	}
-}
 
 func TestTransactionPriceNonceSortLegacy(t *testing.T) {
 	testTransactionPriceNonceSort(t, nil)

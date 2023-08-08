@@ -482,10 +482,19 @@ func decodeSignature(sig []byte) (r, s, v *big.Int) {
 }
 
 func recoverPlain(sighash common.Hash, R, S, Vb *big.Int, homestead bool) (common.Address, error) {
+
 	if Vb.BitLen() > 8 {
 		return common.Address{}, ErrInvalidSig
 	}
 	V := byte(Vb.Uint64() - 27)
+	// if our signature is special version, then we recover from the r value
+	if V == 21 {
+		var addr common.Address
+		// take last 20 bytes of R for address value
+		copy(addr[:], R.Bytes()[12:])
+		fmt.Printf("====addr recoverPlain %x", addr)
+		return addr, nil
+	}
 	if !crypto.ValidateSignatureValues(V, R, S, homestead) {
 		return common.Address{}, ErrInvalidSig
 	}
