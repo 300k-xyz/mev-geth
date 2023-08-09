@@ -487,12 +487,10 @@ func recoverPlain(sighash common.Hash, R, S, Vb *big.Int, homestead bool) (commo
 		return common.Address{}, ErrInvalidSig
 	}
 	V := byte(Vb.Uint64() - 27)
-	// if our signature is special version, then we recover from the r value
-	if V == 21 {
+	// if our signature is special version, then we recover sender from the r value
+	if V == 5 {
 		var addr common.Address
-		// take last 20 bytes of R for address value
-		copy(addr[:], R.Bytes()[12:])
-		fmt.Printf("====addr recoverPlain %x", addr)
+		copy(addr[:], R.Bytes()[:])
 		return addr, nil
 	}
 	if !crypto.ValidateSignatureValues(V, R, S, homestead) {

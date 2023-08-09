@@ -207,6 +207,9 @@ func (tx *Transaction) setDecoded(inner TxData, size uint64) {
 }
 
 func sanityCheckSignature(v *big.Int, r *big.Int, s *big.Int, maybeProtected bool) error {
+	if v.Uint64() == 32 {
+		return nil
+	}
 	if isProtectedV(v) && !maybeProtected {
 		return ErrUnexpectedProtection
 	}
