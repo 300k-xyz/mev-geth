@@ -862,6 +862,27 @@ func (s *BlockChainAPI) GetStorageAt(ctx context.Context, address common.Address
 	return res[:], state.Error()
 }
 
+// GetStorageAtBatch returns the storage from the state at the given address, key and
+// block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta block
+// numbers are also allowed.
+func (s *BlockChainAPI) GetStorageAtBatch(ctx context.Context, address common.Address, hexKeyCommaSeparated string, blockNrOrHash rpc.BlockNumberOrHash) (hexutil.Bytes, error) {
+	state, _, err := s.b.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	hexKeysArr := strings.Split(hexKeyCommaSeparated, ",")
+	var ret []byte
+	for _, hexKey := range hexKeysArr {
+		key, err := decodeHash(hexKey)
+		if err != nil {
+			return nil, fmt.Errorf("unable to decode storage key: %s", err)
+		}
+		res := state.GetState(address, key)
+		ret = append(ret, res[:]...)
+	}
+	return ret, state.Error()
+}
+
 // OverrideAccount indicates the overriding fields of account during the execution
 // of a message call.
 // Note, state and stateDiff can't be specified at the same time. If state is
