@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
@@ -871,14 +872,38 @@ func (s *BlockChainAPI) GetStorageAtBatch(ctx context.Context, address common.Ad
 		return nil, err
 	}
 	hexKeysArr := strings.Split(hexKeyCommaSeparated, ",")
-	var ret []byte
-	for _, hexKey := range hexKeysArr {
-		key, err := decodeHash(hexKey)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode storage key: %s", err)
-		}
-		res := state.GetState(address, key)
-		ret = append(ret, res[:]...)
+	type Result struct {
+		Index int
+		Data  hexutil.Bytes
+	}
+	var ret hexutil.Bytes
+	retMutex := sync.Mutex{}
+	var wg sync.WaitGroup
+
+	results := make(chan Result, len(hexKeysArr))
+	for i, hexKey := range hexKeysArr {
+		wg.Add(1)
+		go func(index int, hexKey string) {
+			defer wg.Done()
+			key, err := decodeHash(hexKey)
+			if err != nil {
+				// Handle error
+				return
+			}
+			res := state.GetState(address, key)
+			results <- Result{Index: index, Data: res[:]}
+		}(i, hexKey)
+	}
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	for result := range results {
+		retMutex.Lock()
+		ret = append(ret, result.Data...)
+		retMutex.Unlock()
 	}
 	return ret, state.Error()
 }
